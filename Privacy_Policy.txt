@@ -1,0 +1,29 @@
+Chính sách Bảo mật
+Giới thiệu
+Tôi cam kết bảo vệ quyền riêng tư của bạn và đảm bảo rằng thông tin cá nhân của bạn được bảo vệ khi sử dụng phần mềm của tôi. Chính sách bảo mật này giải thích cách phần mềm PM_Hoán vị đề thi thu thập, sử dụng và bảo vệ thông tin cá nhân của bạn.
+
+Thông tin Chúng tôi Thu thập
+Phần mềm của chúng tôi thu thập các thông tin sau đây từ máy tính của bạn:
+
+Thông tin về Mainboard: 
+Phần mềm thu thập thông tin về mainboard của máy tính của bạn để đảm bảo tính toàn vẹn và bảo mật của phần mềm.
+Phần mềm sẽ cài đặt một vài khóa vào registry của hệ thống để đảm bảo rằng phần mềm chỉ có thể được sử dụng trên máy tính mà nó đã được cài đặt ban đầu. Điều này giúp ngăn chặn việc sao chép và sử dụng phần mềm trái phép trên các máy tính khác.
+
+Mục đích Thu thập Thông tin
+Bảo mật Phần mềm: Thông tin về mainboard và registry key được sử dụng để đảm bảo rằng phần mềm tôi không bị sao chép và sử dụng trái phép. Điều này giúp đảm bảo rằng người dùng phải tải phần mềm từ Microsoft Store để sử dụng.
+
+Bảo vệ Thông tin Cá nhân
+Tôi đảm bảo rằng các thông tin trên chỉ nhằm mục đích bảo vệ cho phần mềm không bị sao chép trái phép và không gây hại đến hoạt động của máy tính của bạn.
+Phần mềm cũng không gửi các thông tin đó cho bất kỳ ai với bất kỳ hình thức nào thông qua mạng internet.
+Do đó bạn yên tâm rằng các thông tin này của bạn không bị mất mát, lạm dụng hoặc truy cập trái phép. 
+
+Quyền Riêng tư của Bạn
+Hoàn toàn được đảm bảo vì phần mềm không truyền thông tin với bất kỳ hình thức nào.
+
+Thay đổi Chính sách Bảo mật
+Phần mềm hoàn toàn miễn phí, chính sách bảo mật không
+
+Liên hệ
+Nếu bạn có bất kỳ câu hỏi nào về chính sách bảo mật này, vui lòng liên hệ với tôi tại:
+Email: hungvuhuu2010@gmail.com
+Địa chỉ: xóm Thượng, thôn Thượng Đình, xã Nhị Khê, huyện Thường Tín
