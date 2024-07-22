@@ -1,0 +1,68 @@
+Public clb As Document
+Public dehhoanvi As Document
+Sub openclb()
+ Documents.Open ("D:\PMHoanViDeThi\clb.docx")
+ Set clb = Documents("clb.docx")
+End Sub
+
+Sub rng2clb(rng As Range)
+ clb.Range.FormattedText = rng
+End Sub
+
+Sub clb2rng(rng As Range)
+ rng.FormattedText = clb.Range(clb.Range.Start, clb.Range.End - 1)
+End Sub
+
+'Tao. môt. hoan' vi. cua? 4 gia' tri. sô (số thự tự các cell)
+Function hv(a As Long, b As Long, c As Long, d As Long) As Variant
+ Dim x(1 To 4) As Long
+ Dim i As Long, j As Long, tmp As Long
+ x(1) = a
+ x(2) = b
+ x(3) = c
+ x(4) = d
+ Randomize
+ For i = 1 To 4
+  j = Int(4 * Rnd) + 1
+  If j <> i Then
+   tmp = x(i)
+   x(i) = x(j)
+   x(j) = tmp
+  End If
+ Next i
+ hv = x
+End Function
+Function rngcell(cel As Cell) As Range
+ Dim rng As Range
+ Set rng = cel.Range
+ rng.End = rng.End - 1
+ Set rngcell = rng
+End Function
+Sub test()
+ Set dehhoanvi = ActiveDocument
+ If clb Is Nothing Then openclb
+ 
+ Dim tbl As Table
+ Set tbl = Selection.Tables(1)
+ 
+ rng2clb tbl.Range
+ 'Stop
+ 
+ Dim idx As Variant
+ idx = hv(1, 2, 3, 4)
+ 'Stop
+ 
+ Dim i As Long
+ Dim cel As Cell
+ Dim rng As Range
+ For i = 1 To 4
+  'Stop
+  Set cel = tbl.Range.Cells(i)
+  'Stop
+  Set rng = rngcell(cel)
+  'Stop
+  rng.Select
+  'Stop
+  rng.FormattedText = rngcell(clb.Tables(1).Range.Cells(idx(i)))
+ Next i
+End Sub
