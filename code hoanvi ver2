@@ -2,7 +2,7 @@
 '1  Ðêm' nhom' cô' dinh.
 '2  HoanviNhom
 '3  HoanViCau_trong_nhom
-'4  Thuât. toan' hoan' vi. cell
+'4  Thuât. toan' hoan' vi. cella
 '5  LuuTruCacMauHoanViPhuongAn      Import cac' kieu hoan' vi. phuong an'
 
 '6 neww
@@ -267,6 +267,8 @@ Sub hoanviphuongan_type2(tbl As Table)
 'Hoan' vi. bang? 1 côt., dung` chung hàm hoan' vi. nhom'
 HoanViCau_trong_nhom tbl
 End Sub
+
+#If False Then
 Sub hoanviphuongan_type1(tbl As Table)
 Dim cot As Long
 Dim roulet As Byte
@@ -387,7 +389,9 @@ Select Case cot
   tbl.Rows(last).Delete     'Xoa' dong` dêm.
 End Select
 End Sub
+#End If
 
+#If False Then
 Sub hoanviphuongan_type0(tbl As Table)
 Dim cot As Long
 Randomize
@@ -620,11 +624,12 @@ Select Case cot
        'Xoa' dong` dêm.
 'End Select
 End Sub
+#End If
 
 
 
 '5
-'5.0
+'5.0    cAC' MÂU~ PHUONG AN' LUU VAO` idx01, idx02, idx03, idx12
 Sub LuuTruCacMauHoanViPhuongAn()
     'Dim xlApp As Object
     Dim xlWb As Object, xlwb2 As Object
@@ -677,6 +682,7 @@ End Sub
 Sub openclb()
  Documents.Open ("D:\PMHoanViDeThi\clb.docx")
  Set clb = Documents("clb.docx")
+ LuuTruCacMauHoanViPhuongAn
 End Sub
     
     '6.1    Gia? lâp. copy vao` bô. nho' tam.
@@ -692,20 +698,18 @@ Function rngcell(cel As cell) As Range
  Set rngcell = rng
 End Function
     
-    '6.3    Hoan' vi. 4 cell trong bang?
+    '6.3    Hoan' vi. phuong an' type 1
     Sub test_hoanvitbl()
-    LuuTruCacMauHoanViPhuongAn
     Dim i As Long
-    Application.ScreenUpdating = False
     Dim tbl As Table
     For i = 1 To ActiveDocument.Tables.count
      Set tbl = ActiveDocument.Tables(i)
-     hoanvitbl tbl
+     hoanviphuongan_type1 tbl
 '     Stop
     Next i
     End Sub
-    '  Hoan' vi. cac' cell trong bang?
-Sub hoanvitbl(tbl As Table)
+    
+Sub hoanviphuongan_type1(tbl As Table)
  'Set dehhoanvi = ActiveDocument
  If clb Is Nothing Then openclb
  
@@ -728,8 +732,58 @@ Sub hoanvitbl(tbl As Table)
   'Stop
   Set rng = rngcell(cel)
   'Stop
-  rng.Select
+  'rng.Select
   'Stop
   rng.FormattedText = rngcell(clb.Tables(1).Range.Cells(idx12(roulet, i)))
  Next i
 End Sub
+
+    '6.4  Hoan' vi. phuong an' type 1
+    Sub test_hoanviphongantype0()
+     hoanviphuongan_type0 Selection.Tables(1)
+    End Sub
+Sub hoanviphuongan_type0(tbl As Table)
+ 'Set dehhoanvi = ActiveDocument
+ If clb Is Nothing Then openclb
+
+ rng2clb tbl.Range
+ 'Stop
+ 
+ Dim i As Long
+ Dim roulet As Long
+ Randomize
+ roulet = Int(Rnd * 24) + 1      'Chon. 1 trong 24 kiêu? hoan' vi.
+ 
+ Dim cel As cell
+ Dim rng As Range
+ Dim idx As Variant
+    
+ Select Case tbl.Columns.count
+ Case 5
+  idx = Array(2, 3, 4, 5)
+  For i = 1 To 4
+   Set cel = tbl.Range.Cells(idx(i - 1))
+   Set rng = rngcell(cel)
+   rng.FormattedText = rngcell(clb.Tables(1).Range.Cells(idx01(roulet, i)))
+  Next i
+ 
+ Case 3
+  idx = Array(2, 3, 5, 6)
+  For i = 1 To 4
+   Set cel = tbl.Range.Cells(idx(i - 1))
+   Set rng = rngcell(cel)
+   rng.FormattedText = rngcell(clb.Tables(1).Range.Cells(idx02(roulet, i)))
+  Next i
+ 
+ Case 2
+  idx = Array(2, 4, 6, 8)
+  For i = 1 To 4
+   Set cel = tbl.Range.Cells(idx(i - 1))
+   Set rng = rngcell(cel)
+   rng.FormattedText = rngcell(clb.Tables(1).Range.Cells(idx03(roulet, i)))
+  Next i
+ End Select
+ 
+ 
+End Sub
+
