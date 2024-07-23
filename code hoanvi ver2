@@ -1,59 +1,726 @@
-Public clb As Document
-Public dehhoanvi As Document
+'CAC' MODULE HOAN' VI
+'1  Ðêm' nhom' cô' dinh.
+'2  HoanviNhom
+'3  HoanViCau_trong_nhom
+'4  Thuât. toan' hoan' vi. cell
+'5  LuuTruCacMauHoanViPhuongAn      Import cac' kieu hoan' vi. phuong an'
+
+'6 neww
+    'Thuât. toan' hoan' vi. cac' cell trong bang? phuong an'
+
+'khai bao' cac' mang? luu cac' kiêu? hoan' vi. phuong an'
+    Public idx01(1 To 24, 1 To 4) As Long
+    Public idx02(1 To 24, 1 To 4) As Long
+    Public idx03(1 To 24, 1 To 4) As Long
+    
+    Public idx12(1 To 24, 1 To 4) As Long
+    
+    Public clb As Document
+    
+
+'1 Ðêm' sô' nhom' cô' dinh.
+Function DemSoNhomCoDinh(tbl As Table) As Integer
+ Dim cell As cell
+ Dim count As Integer
+ count = 0
+ 
+ For Each cell In tbl.Range.Cells
+  
+  If Left(cell.Range.text, 4) = "<##>" Or _
+    Left(cell.Range.text, 4) = "<#?>" _
+  Then
+   count = count + 1
+  End If
+ Next cell
+ 
+ ' Return the count
+ DemSoNhomCoDinh = count
+End Function
+'2.1  Hô~ tro.: Hoan' vi. hang` trong bang? co' bang? con
+'OK
+Sub hoanvi_hang_co_bang_con(tbl As Table, i As Long, j As Long)
+ 
+If i < j Then
+ tbl.Rows(i).Select
+ Selection.Cut    'cut dong` thu' i
+          'dong` j --> j-1
+  GoToPos tbl.Rows(j - 1).Range.Start
+'  'stop
+  Selection.Paste
+          'dong` j vê` dung' chô~
+  tbl.Rows(j).Select
+  Selection.Cut
+  GoToPos tbl.Rows(i).Range.Start
+' 'stop
+  Selection.Paste
+Else
+  Dim tmp As Long
+  tmp = j
+  j = i
+  i = tmp
+  hoanvi_hang_co_bang_con tbl, i, j
+End If
+
+End Sub
+'2.2    Tao. STT ngâu~ nhiên cô' dinh. nhom'
+
+
+Sub Tao_STT_ngau_nhien_de_sap_xep(tbl As Table)
+    Dim nums() As Integer
+    Dim numRows As Integer
+    Dim i As Integer
+    Dim j As Integer
+    Dim temp As Integer
+    Randomize
+    ' L?y s? hàng c?a b?ng
+    numRows = tbl.Rows.count
+'tbl.Select
+'Stop
+'MsgBox DemSoNhomCoDinh(tbl)
+
+'Nêu' co' it' nhât' 2 nhom' không cô' dinh.
+    ' Kh?i t?o m?ng v?i các giá tr? t? 1 d?n numRows
+    ReDim nums(1 To numRows)
+    For i = 1 To numRows
+        nums(i) = i
+    Next i
+    
+    ' Sinh hoán v? ng?u nhiên b?ng cách tráo d?i các ph?n t?
+    For i = numRows To 2 Step -1
+        j = Int((i - 1 + 1) * Rnd + 1) ' T?o ch? s? ng?u nhiên t? 1 d?n i
+        ' Tráo d?i nums(i) và nums(j)
+        temp = nums(i)
+        nums(i) = nums(j)
+        nums(j) = temp
+    Next i
+    
+    'Tinh chinh? hoan' vi. dê? cô' dinh. hang` co ky' hiêu. <#
+If DemSoNhomCoDinh(tbl) > 0 Then
+    For i = 1 To numRows
+     If (Left(tbl.cell(i, 1).Range.text, 4) = "<#?>" Or _
+        Left(tbl.cell(i, 1).Range.text, 4) = "<##>") And _
+        nums(i) <> i Then
+            'Tim` phân` tu?? mang gia' tri. i
+         For j = 1 To numRows
+          If nums(j) = i Then Exit For
+         Next j
+        nums(j) = nums(i)   'dôi? gia' tri. cho phân` tu? j
+        nums(i) = i
+     End If
+    Next i
+End If
+'Dim lastcol As Long
+lastcol = tbl.Columns.count
+    ' Ði?n hoán v? vào c?t th? 2 c?a b?ng
+    For i = 1 To numRows
+        'tbl.cell(i, 2).Range.Font.ColorIndex = wdWhite
+        tbl.cell(i, lastcol).Range.text = nums(i)
+    Next i
+'    Stop
+End Sub
+
+'2,3    HoanviNhom
+Sub Hoan_Vi_nhom(tbl As Table)
+ Dim i As Long
+
+'nêu' tât' ca? la` nhom' cô' dinh. thi` không hoan' vi. nhom'
+If DemSoNhomCoDinh(tbl) = numRows Or _
+    DemSoNhomCoDinh(tbl) = numRows - 1 _
+Then
+  Exit Sub
+End If
+'Stop
+
+ ' Chèn c?t m?i sau c?t d?u tiên
+ tbl.AutoFitBehavior wdAutoFitWindow
+ tbl.Columns.Add
+'Stop
+ Tao_STT_ngau_nhien_de_sap_xep tbl
+'Stop
+ ' S?p x?p b?ng theo c?t m?i (c?t 3)
+ tbl.Sort _
+  ExcludeHeader:=False, _
+  FieldNumber:="Column 2", _
+  SortFieldType:=wdSortFieldNumeric, _
+  SortOrder:=wdSortOrderAscending
+
+ ' Xóa các c?t thêm vào
+ tbl.Columns(2).Delete
+ tbl.AutoFitBehavior wdAutoFitWindow
+End Sub
+
+Sub HoanViCau_trong_nhom(tbl As Table)
+ Dim i As Long
+ ' Chèn c?t m?i sau c?t d?u tiên
+ tbl.Columns.Add
+'  Stop
+ 'tbl.AutoFitBehavior wdAutoFitWindow
+ 'Stop
+ Tao_STT_ngau_nhien_de_sap_xep tbl
+' Stop
+Dim lastcol As Long
+ lastcol = tbl.Columns.count
+ ' S?p x?p b?ng theo c?t m?i (c?t 3)
+ tbl.Sort _
+  ExcludeHeader:=False, _
+  FieldNumber:="Column " + CStr(lastcol), _
+  SortFieldType:=wdSortFieldNumeric, _
+  SortOrder:=wdSortOrderAscending
+ 'Stop
+
+ ' Xóa các c?t thêm vào
+ tbl.Columns(tbl.Columns.count).Delete
+ tbl.AutoFitBehavior wdAutoFitWindow
+End Sub
+Sub test_hoanvicautrongnhom()
+HoanViCau_trong_nhom Selection.Tables(1)
+End Sub
+
+'3
+
+'Hô~ tro. hoan' vi. nôi. dung cac' phuong an'
+
+'4    Hoan' vi. nho' sao chep' cell vao' trunggian
+    '4.1   Ham` trich' nôi. dung range
+Function txtof(rng As Range) As Range
+Dim tmp As Range
+Set tmp = rng
+If Right(tmp.text, 1) = Chr(7) Then tmp.End = tmp.End - 1
+Set txtof = tmp
+End Function
+    '4.2.   sao chep' nôi. dung cell không chu'a bang?
+Sub CopyCelToCel(cel1 As cell, cel2 As cell)
+Dim rng1 As Range, rng2 As Range
+Set rng1 = txtof(cel1.Range)
+Set rng2 = txtof(cel2.Range)
+'rng1.Copy
+'rng2.Paste
+'GoToPos rng2.Start
+rng2.FormattedText = rng1
+End Sub
+
+Sub hoanvi2cel_khong_chua_bang(cel1 As cell, cel2 As cell)
+
+Dim tbl As Table
+cel1.Select
+Set tbl = Selection.Tables(1)
+'tbl.Rows.Add
+
+Dim lastRow As Long
+lastRow = tbl.Rows.count
+
+Dim trunggian As cell
+Set trunggian = tbl.cell(lastRow, 1)
+
+CopyCelToCel cel1, trunggian
+CopyCelToCel cel2, cel1
+CopyCelToCel trunggian, cel2
+
+'tbl.Rows(lastRow).Delete
+End Sub
+Sub hoanviphuongan(tbl As Table)
+tbl.Select
+'Stop
+'MsgBox questionType(tbl)
+'Stop
+Select Case questionType(tbl)
+Case 0  'Câu hoi? không nôi. dung
+ hoanviphuongan_type0 tbl
+ DanhsoPhuongAn_xuatDapAn_type0 tbl
+Case 1  'Câu hoi? 4 phuong an' 1 lua. chon.
+ hoanviphuongan_type1 tbl
+ DanhsoPhuongAn_xuatDapAn_type1 tbl
+Case 2  'Câu hoi? dung' sai
+ hoanviphuongan_type2 tbl
+ DanhsoPhuongAn_xuatDapAn_type2 tbl
+Case 3  'Câu hoi? short ans
+ 'hoanviphuongan_type3 tbl     'Không co' phuong an' dê? hoan' vi.
+ DanhsoPhuongAn_xuatDapAn_type3 tbl
+Case 4  'Câu hoi? ghep' dôi
+ hoanviphuongan_type4 tbl
+ DanhsoPhuongAn_xuatDapAn_type4 tbl
+Case 5  'Câu hoi? diên` khuyêt'
+ hoanviphuongan_type5 tbl
+ DanhsoPhuongAn_xuatDapAn_type5 tbl
+'Case 6  'Câu hoi? diên` khuyêt' short ans
+ 'hoanviphuongan_type6 tbl
+ 'DanhsoPhuongAn_xuatDapAn_type6 tbl
+End Select
+End Sub
+Sub test_hoaviphuongan()
+hoanviphuongan Selection.Tables(1)
+End Sub
+Sub hoanviphuongan_type6(tbl As Table)
+'Chi? tri'ch dap' sô' va` xoa' hang` dap' sô' di
+End Sub
+Sub hoanviphuongan_type5(tbl As Table)
+'Hoan' vi. cac' dap' an' va` cac' phuong an' gây nhiêu~
+End Sub
+Sub hoanviphuongan_type4(tbl As Table)
+'Hoan' vi. theo tu*ng` côt. (bôi mau` dê?? nhân. dang.)
+End Sub
+Sub hoanviphuongan_type3(tbl As Table)
+'Không co' hoan' vi. phuong an',
+    'chi? trich' ghi dap' án va` xoa' hang` dap' sô'
+End Sub
+Sub hoanviphuongan_type2(tbl As Table)
+'Hoan' vi. bang? 1 côt., dung` chung hàm hoan' vi. nhom'
+HoanViCau_trong_nhom tbl
+End Sub
+Sub hoanviphuongan_type1(tbl As Table)
+Dim cot As Long
+Dim roulet As Byte
+Randomize
+cot = tbl.Columns.count
+Select Case cot
+ Case 1     'Kiêu? bang? 1 côt., 4 dong`
+  HoanViCau_trong_nhom tbl
+ Case 2, 4  'Kiêu? bang? 2 côt. hoa(c. 4 côt.
+  tbl.Rows.Add      'Tao. dong` dêm. dê? luu ` phuong an'
+  Dim last As Long
+  last = tbl.Rows.count
+  
+  roulet = Int(24 * Rnd)
+  Select Case roulet
+  Case 0    'abcd
+     tbl.Rows(tbl.Rows.count).Delete
+     Exit Sub
+  Case 1      'abdc
+     hoanvi2cel_khong_chua_bang tbl.Range.Cells(3), tbl.Range.Cells(4)
+  Case 2      'acbd
+     hoanvi2cel_khong_chua_bang tbl.Range.Cells(2), tbl.Range.Cells(3)
+  Case 3      'acdb
+     CopyCelToCel tbl.Range.Cells(2), tbl.Range.Cells(5)
+     CopyCelToCel tbl.Range.Cells(3), tbl.Range.Cells(2)
+     CopyCelToCel tbl.Range.Cells(4), tbl.Range.Cells(3)
+     CopyCelToCel tbl.Range.Cells(5), tbl.Range.Cells(4)
+  Case 4      'adbc
+     CopyCelToCel tbl.Range.Cells(2), tbl.Range.Cells(5)
+     CopyCelToCel tbl.Range.Cells(4), tbl.Range.Cells(2)
+     CopyCelToCel tbl.Range.Cells(3), tbl.Range.Cells(4)
+     CopyCelToCel tbl.Range.Cells(5), tbl.Range.Cells(3)
+  Case 5      'adcb
+     hoanvi2cel_khong_chua_bang tbl.Range.Cells(2), tbl.Range.Cells(4)
+  Case 6      'bacd
+     hoanvi2cel_khong_chua_bang tbl.Range.Cells(1), tbl.Range.Cells(2)
+  Case 7      'badc
+     hoanvi2cel_khong_chua_bang tbl.Range.Cells(1), tbl.Range.Cells(2)
+     hoanvi2cel_khong_chua_bang tbl.Range.Cells(3), tbl.Range.Cells(4)
+  Case 8      'bcad
+     CopyCelToCel tbl.Range.Cells(1), tbl.Range.Cells(5)
+     CopyCelToCel tbl.Range.Cells(2), tbl.Range.Cells(1)
+     CopyCelToCel tbl.Range.Cells(3), tbl.Range.Cells(2)
+     CopyCelToCel tbl.Range.Cells(5), tbl.Range.Cells(3)
+  Case 9      'bcda
+     CopyCelToCel tbl.Range.Cells(1), tbl.Range.Cells(5)
+     CopyCelToCel tbl.Range.Cells(2), tbl.Range.Cells(1)
+     CopyCelToCel tbl.Range.Cells(3), tbl.Range.Cells(2)
+     CopyCelToCel tbl.Range.Cells(4), tbl.Range.Cells(3)
+     CopyCelToCel tbl.Range.Cells(5), tbl.Range.Cells(4)
+  Case 10     'bdca
+     CopyCelToCel tbl.Range.Cells(1), tbl.Range.Cells(5)
+     CopyCelToCel tbl.Range.Cells(2), tbl.Range.Cells(1)
+     CopyCelToCel tbl.Range.Cells(4), tbl.Range.Cells(2)
+     CopyCelToCel tbl.Range.Cells(5), tbl.Range.Cells(4)
+  Case 11     'bdac
+     CopyCelToCel tbl.Range.Cells(1), tbl.Range.Cells(5)
+     CopyCelToCel tbl.Range.Cells(2), tbl.Range.Cells(1)
+     CopyCelToCel tbl.Range.Cells(4), tbl.Range.Cells(2)
+     CopyCelToCel tbl.Range.Cells(3), tbl.Range.Cells(4)
+     CopyCelToCel tbl.Range.Cells(5), tbl.Range.Cells(3)
+  Case 12     'cbda
+     CopyCelToCel tbl.Range.Cells(1), tbl.Range.Cells(5)
+     CopyCelToCel tbl.Range.Cells(3), tbl.Range.Cells(1)
+     CopyCelToCel tbl.Range.Cells(4), tbl.Range.Cells(3)
+     CopyCelToCel tbl.Range.Cells(5), tbl.Range.Cells(4)
+  Case 13     'cdab
+     hoanvi2cel_khong_chua_bang tbl.Range.Cells(1), tbl.Range.Cells(3)
+     hoanvi2cel_khong_chua_bang tbl.Range.Cells(2), tbl.Range.Cells(4)
+  Case 14     'cdba
+     CopyCelToCel tbl.Range.Cells(1), tbl.Range.Cells(5)
+     CopyCelToCel tbl.Range.Cells(3), tbl.Range.Cells(1)
+     CopyCelToCel tbl.Range.Cells(2), tbl.Range.Cells(3)
+     CopyCelToCel tbl.Range.Cells(4), tbl.Range.Cells(2)
+     CopyCelToCel tbl.Range.Cells(5), tbl.Range.Cells(4)
+  Case 15     'dabc
+    CopyCelToCel tbl.Range.Cells(1), tbl.Range.Cells(5)
+    CopyCelToCel tbl.Range.Cells(4), tbl.Range.Cells(1)
+    CopyCelToCel tbl.Range.Cells(3), tbl.Range.Cells(4)
+    CopyCelToCel tbl.Range.Cells(2), tbl.Range.Cells(3)
+    CopyCelToCel tbl.Range.Cells(5), tbl.Range.Cells(2)
+  Case 16     'dacb
+    CopyCelToCel tbl.Range.Cells(1), tbl.Range.Cells(5)
+    CopyCelToCel tbl.Range.Cells(4), tbl.Range.Cells(1)
+    CopyCelToCel tbl.Range.Cells(2), tbl.Range.Cells(4)
+    CopyCelToCel tbl.Range.Cells(5), tbl.Range.Cells(2)
+  Case 17     'dbac
+     CopyCelToCel tbl.Range.Cells(1), tbl.Range.Cells(5)
+     CopyCelToCel tbl.Range.Cells(4), tbl.Range.Cells(1)
+     CopyCelToCel tbl.Range.Cells(3), tbl.Range.Cells(4)
+     CopyCelToCel tbl.Range.Cells(5), tbl.Range.Cells(3)
+  Case 18   'dbca
+    hoanvi2cel_khong_chua_bang tbl.Range.Cells(1), tbl.Range.Cells(4)
+  Case 19   'dcab
+    CopyCelToCel tbl.Range.Cells(1), tbl.Range.Cells(5)
+    CopyCelToCel tbl.Range.Cells(4), tbl.Range.Cells(1)
+    CopyCelToCel tbl.Range.Cells(2), tbl.Range.Cells(4)
+    CopyCelToCel tbl.Range.Cells(3), tbl.Range.Cells(2)
+    CopyCelToCel tbl.Range.Cells(5), tbl.Range.Cells(3)
+  Case 20   'dcba
+    hoanvi2cel_khong_chua_bang tbl.Range.Cells(1), tbl.Range.Cells(4)
+    hoanvi2cel_khong_chua_bang tbl.Range.Cells(2), tbl.Range.Cells(3)
+  Case 21   'cabd
+    CopyCelToCel tbl.Range.Cells(1), tbl.Range.Cells(5)
+    CopyCelToCel tbl.Range.Cells(3), tbl.Range.Cells(1)
+    CopyCelToCel tbl.Range.Cells(2), tbl.Range.Cells(3)
+    CopyCelToCel tbl.Range.Cells(5), tbl.Range.Cells(2)
+  Case 22   'cbad
+    hoanvi2cel_khong_chua_bang tbl.Range.Cells(1), tbl.Range.Cells(3)
+  Case 23   'cadb
+    CopyCelToCel tbl.Range.Cells(1), tbl.Range.Cells(5)
+    CopyCelToCel tbl.Range.Cells(3), tbl.Range.Cells(1)
+    CopyCelToCel tbl.Range.Cells(4), tbl.Range.Cells(3)
+    CopyCelToCel tbl.Range.Cells(2), tbl.Range.Cells(4)
+    CopyCelToCel tbl.Range.Cells(5), tbl.Range.Cells(2)
+  End Select
+  'Stop
+  tbl.Rows(last).Delete     'Xoa' dong` dêm.
+End Select
+End Sub
+
+Sub hoanviphuongan_type0(tbl As Table)
+Dim cot As Long
+Randomize
+Dim roulet As Byte
+cot = tbl.Columns.count
+Select Case cot
+ Case 2     'Kiêu? bang? 4 dong`
+  txtof(tbl.cell(1, 1).Range).Cut
+  HoanViCau_trong_nhom tbl
+  txtof(tbl.cell(1, 1).Range).Paste
+  
+ Case 5  'Kiêu? bang? 5 côt.
+  tbl.Rows.Add      'Tao. vung` dêm. dê? hoan' vi. phuong an'
+  Dim last As Long
+  last = tbl.Rows.count
+  
+  roulet = Int(24 * Rnd)
+  Select Case roulet
+  Case 0    'abcd
+     tbl.Rows(tbl.Rows.count).Delete
+     Exit Sub
+  Case 1      'abdc
+     hoanvi2cel_khong_chua_bang tbl.Range.Cells(4), tbl.Range.Cells(5)
+  Case 2      'acbd
+     hoanvi2cel_khong_chua_bang tbl.Range.Cells(3), tbl.Range.Cells(4)
+  Case 3      'acdb
+     CopyCelToCel tbl.Range.Cells(3), tbl.Range.Cells(6)
+     CopyCelToCel tbl.Range.Cells(4), tbl.Range.Cells(3)
+     CopyCelToCel tbl.Range.Cells(5), tbl.Range.Cells(4)
+     CopyCelToCel tbl.Range.Cells(6), tbl.Range.Cells(5)
+  Case 4      'adbc
+     CopyCelToCel tbl.Range.Cells(3), tbl.Range.Cells(6)
+     CopyCelToCel tbl.Range.Cells(5), tbl.Range.Cells(3)
+     CopyCelToCel tbl.Range.Cells(4), tbl.Range.Cells(5)
+     CopyCelToCel tbl.Range.Cells(6), tbl.Range.Cells(4)
+  Case 5      'adcb
+     hoanvi2cel_khong_chua_bang tbl.Range.Cells(3), tbl.Range.Cells(5)
+     
+  Case 6      'bacd
+     hoanvi2cel_khong_chua_bang tbl.Range.Cells(2), tbl.Range.Cells(3)
+  Case 7      'badc
+     hoanvi2cel_khong_chua_bang tbl.Range.Cells(2), tbl.Range.Cells(3)
+     hoanvi2cel_khong_chua_bang tbl.Range.Cells(4), tbl.Range.Cells(5)
+  Case 8      'bcad
+     CopyCelToCel tbl.Range.Cells(2), tbl.Range.Cells(6)
+     CopyCelToCel tbl.Range.Cells(3), tbl.Range.Cells(2)
+     CopyCelToCel tbl.Range.Cells(4), tbl.Range.Cells(3)
+     CopyCelToCel tbl.Range.Cells(6), tbl.Range.Cells(4)
+  Case 9      'bcda
+     CopyCelToCel tbl.Range.Cells(2), tbl.Range.Cells(6)
+     CopyCelToCel tbl.Range.Cells(3), tbl.Range.Cells(2)
+     CopyCelToCel tbl.Range.Cells(4), tbl.Range.Cells(3)
+     CopyCelToCel tbl.Range.Cells(5), tbl.Range.Cells(4)
+     CopyCelToCel tbl.Range.Cells(6), tbl.Range.Cells(5)
+  Case 10     'bdca
+     CopyCelToCel tbl.Range.Cells(2), tbl.Range.Cells(6)
+     CopyCelToCel tbl.Range.Cells(3), tbl.Range.Cells(2)
+     CopyCelToCel tbl.Range.Cells(5), tbl.Range.Cells(3)
+     CopyCelToCel tbl.Range.Cells(6), tbl.Range.Cells(5)
+  Case 11     'bdac
+     CopyCelToCel tbl.Range.Cells(2), tbl.Range.Cells(6)
+     CopyCelToCel tbl.Range.Cells(3), tbl.Range.Cells(2)
+     CopyCelToCel tbl.Range.Cells(5), tbl.Range.Cells(3)
+     CopyCelToCel tbl.Range.Cells(4), tbl.Range.Cells(5)
+     CopyCelToCel tbl.Range.Cells(6), tbl.Range.Cells(4)
+  Case 12     'cbda
+     CopyCelToCel tbl.Range.Cells(2), tbl.Range.Cells(6)
+     CopyCelToCel tbl.Range.Cells(4), tbl.Range.Cells(2)
+     CopyCelToCel tbl.Range.Cells(5), tbl.Range.Cells(4)
+     CopyCelToCel tbl.Range.Cells(6), tbl.Range.Cells(5)
+  Case 13     'cdab
+     hoanvi2cel_khong_chua_bang tbl.Range.Cells(2), tbl.Range.Cells(4)
+     hoanvi2cel_khong_chua_bang tbl.Range.Cells(3), tbl.Range.Cells(5)
+  Case 14     'cdba
+     CopyCelToCel tbl.Range.Cells(2), tbl.Range.Cells(6)
+     CopyCelToCel tbl.Range.Cells(4), tbl.Range.Cells(2)
+     CopyCelToCel tbl.Range.Cells(3), tbl.Range.Cells(4)
+     CopyCelToCel tbl.Range.Cells(5), tbl.Range.Cells(3)
+     CopyCelToCel tbl.Range.Cells(6), tbl.Range.Cells(5)
+  Case 15     'dabc
+    CopyCelToCel tbl.Range.Cells(2), tbl.Range.Cells(6)
+    CopyCelToCel tbl.Range.Cells(5), tbl.Range.Cells(2)
+    CopyCelToCel tbl.Range.Cells(4), tbl.Range.Cells(5)
+    CopyCelToCel tbl.Range.Cells(3), tbl.Range.Cells(4)
+    CopyCelToCel tbl.Range.Cells(6), tbl.Range.Cells(3)
+  Case 16     'dacb
+    CopyCelToCel tbl.Range.Cells(2), tbl.Range.Cells(6)
+    CopyCelToCel tbl.Range.Cells(5), tbl.Range.Cells(2)
+    CopyCelToCel tbl.Range.Cells(3), tbl.Range.Cells(5)
+    CopyCelToCel tbl.Range.Cells(6), tbl.Range.Cells(3)
+  Case 17     'dbac
+     CopyCelToCel tbl.Range.Cells(2), tbl.Range.Cells(6)
+     CopyCelToCel tbl.Range.Cells(5), tbl.Range.Cells(2)
+     CopyCelToCel tbl.Range.Cells(4), tbl.Range.Cells(5)
+     CopyCelToCel tbl.Range.Cells(6), tbl.Range.Cells(4)
+  Case 18   'dbca
+    hoanvi2cel_khong_chua_bang tbl.Range.Cells(2), tbl.Range.Cells(5)
+  Case 19   'dcab
+    CopyCelToCel tbl.Range.Cells(2), tbl.Range.Cells(6)
+    CopyCelToCel tbl.Range.Cells(5), tbl.Range.Cells(2)
+    CopyCelToCel tbl.Range.Cells(3), tbl.Range.Cells(5)
+    CopyCelToCel tbl.Range.Cells(4), tbl.Range.Cells(3)
+    CopyCelToCel tbl.Range.Cells(6), tbl.Range.Cells(4)
+  Case 20   'dcba
+    hoanvi2cel_khong_chua_bang tbl.Range.Cells(2), tbl.Range.Cells(5)
+    hoanvi2cel_khong_chua_bang tbl.Range.Cells(3), tbl.Range.Cells(4)
+  Case 21   'cabd
+    CopyCelToCel tbl.Range.Cells(2), tbl.Range.Cells(6)
+    CopyCelToCel tbl.Range.Cells(4), tbl.Range.Cells(2)
+    CopyCelToCel tbl.Range.Cells(3), tbl.Range.Cells(4)
+    CopyCelToCel tbl.Range.Cells(6), tbl.Range.Cells(3)
+  Case 22   'cbad
+    hoanvi2cel_khong_chua_bang tbl.Range.Cells(2), tbl.Range.Cells(4)
+  Case 23   'cadb
+    CopyCelToCel tbl.Range.Cells(2), tbl.Range.Cells(6)
+    CopyCelToCel tbl.Range.Cells(4), tbl.Range.Cells(2)
+    CopyCelToCel tbl.Range.Cells(5), tbl.Range.Cells(4)
+    CopyCelToCel tbl.Range.Cells(3), tbl.Range.Cells(5)
+    CopyCelToCel tbl.Range.Cells(6), tbl.Range.Cells(3)
+  End Select
+  tbl.Rows(last).Delete
+ Case 3  'Kiêu? bang? 3 côt.
+            'Cac' phuong an' duoc. hoan' vi. qua cell trung gian là cells(4)
+  roulet = Int(24 * Rnd)
+  Select Case roulet
+  Case 0    'abcd
+     Exit Sub
+  Case 1      'abdc
+     hoanvi2cel_khong_chua_bang tbl.Range.Cells(5), tbl.Range.Cells(6)
+  Case 2      'acbd
+     hoanvi2cel_khong_chua_bang tbl.Range.Cells(3), tbl.Range.Cells(5)
+  Case 3      'acdb
+     CopyCelToCel tbl.Range.Cells(3), tbl.Range.Cells(4)
+     CopyCelToCel tbl.Range.Cells(5), tbl.Range.Cells(3)
+     CopyCelToCel tbl.Range.Cells(6), tbl.Range.Cells(5)
+     CopyCelToCel tbl.Range.Cells(4), tbl.Range.Cells(6)
+  Case 4      'adbc
+     CopyCelToCel tbl.Range.Cells(3), tbl.Range.Cells(4)
+     CopyCelToCel tbl.Range.Cells(6), tbl.Range.Cells(3)
+     CopyCelToCel tbl.Range.Cells(5), tbl.Range.Cells(6)
+     CopyCelToCel tbl.Range.Cells(4), tbl.Range.Cells(5)
+  Case 5      'adcb
+     hoanvi2cel_khong_chua_bang tbl.Range.Cells(3), tbl.Range.Cells(6)
+  Case 6      'bacd
+     hoanvi2cel_khong_chua_bang tbl.Range.Cells(2), tbl.Range.Cells(3)
+  Case 7      'badc
+     hoanvi2cel_khong_chua_bang tbl.Range.Cells(2), tbl.Range.Cells(3)
+     hoanvi2cel_khong_chua_bang tbl.Range.Cells(5), tbl.Range.Cells(6)
+  Case 8      'bcad
+     CopyCelToCel tbl.Range.Cells(2), tbl.Range.Cells(4)
+     CopyCelToCel tbl.Range.Cells(3), tbl.Range.Cells(2)
+     CopyCelToCel tbl.Range.Cells(5), tbl.Range.Cells(3)
+     CopyCelToCel tbl.Range.Cells(4), tbl.Range.Cells(5)
+  Case 9      'bcda
+     CopyCelToCel tbl.Range.Cells(2), tbl.Range.Cells(4)
+     CopyCelToCel tbl.Range.Cells(3), tbl.Range.Cells(2)
+     CopyCelToCel tbl.Range.Cells(5), tbl.Range.Cells(3)
+     CopyCelToCel tbl.Range.Cells(6), tbl.Range.Cells(5)
+     CopyCelToCel tbl.Range.Cells(4), tbl.Range.Cells(6)
+  Case 10     'bdca
+     CopyCelToCel tbl.Range.Cells(2), tbl.Range.Cells(4)
+     CopyCelToCel tbl.Range.Cells(3), tbl.Range.Cells(2)
+     CopyCelToCel tbl.Range.Cells(6), tbl.Range.Cells(3)
+     CopyCelToCel tbl.Range.Cells(4), tbl.Range.Cells(6)
+  Case 11     'bdac
+     CopyCelToCel tbl.Range.Cells(2), tbl.Range.Cells(4)
+     CopyCelToCel tbl.Range.Cells(3), tbl.Range.Cells(2)
+     CopyCelToCel tbl.Range.Cells(6), tbl.Range.Cells(3)
+     CopyCelToCel tbl.Range.Cells(5), tbl.Range.Cells(6)
+     CopyCelToCel tbl.Range.Cells(4), tbl.Range.Cells(5)
+  Case 12     'cbda
+     CopyCelToCel tbl.Range.Cells(2), tbl.Range.Cells(4)
+     CopyCelToCel tbl.Range.Cells(5), tbl.Range.Cells(2)
+     CopyCelToCel tbl.Range.Cells(6), tbl.Range.Cells(5)
+     CopyCelToCel tbl.Range.Cells(4), tbl.Range.Cells(6)
+  Case 13     'cdab
+     hoanvi2cel_khong_chua_bang tbl.Range.Cells(2), tbl.Range.Cells(5)
+     hoanvi2cel_khong_chua_bang tbl.Range.Cells(3), tbl.Range.Cells(6)
+  Case 14     'cdba
+     CopyCelToCel tbl.Range.Cells(2), tbl.Range.Cells(4)
+     CopyCelToCel tbl.Range.Cells(5), tbl.Range.Cells(2)
+     CopyCelToCel tbl.Range.Cells(3), tbl.Range.Cells(5)
+     CopyCelToCel tbl.Range.Cells(6), tbl.Range.Cells(3)
+     CopyCelToCel tbl.Range.Cells(4), tbl.Range.Cells(6)
+  Case 15     'dabc
+    CopyCelToCel tbl.Range.Cells(2), tbl.Range.Cells(4)
+    CopyCelToCel tbl.Range.Cells(6), tbl.Range.Cells(2)
+    CopyCelToCel tbl.Range.Cells(5), tbl.Range.Cells(6)
+    CopyCelToCel tbl.Range.Cells(3), tbl.Range.Cells(5)
+    CopyCelToCel tbl.Range.Cells(4), tbl.Range.Cells(3)
+  Case 16     'dacb
+    CopyCelToCel tbl.Range.Cells(2), tbl.Range.Cells(4)
+    CopyCelToCel tbl.Range.Cells(6), tbl.Range.Cells(2)
+    CopyCelToCel tbl.Range.Cells(3), tbl.Range.Cells(6)
+    CopyCelToCel tbl.Range.Cells(4), tbl.Range.Cells(3)
+  Case 17     'dbac
+     CopyCelToCel tbl.Range.Cells(2), tbl.Range.Cells(4)
+     CopyCelToCel tbl.Range.Cells(6), tbl.Range.Cells(2)
+     CopyCelToCel tbl.Range.Cells(5), tbl.Range.Cells(6)
+     CopyCelToCel tbl.Range.Cells(4), tbl.Range.Cells(5)
+  Case 18   'dbca
+    hoanvi2cel_khong_chua_bang tbl.Range.Cells(2), tbl.Range.Cells(6)
+  Case 19   'dcab
+    CopyCelToCel tbl.Range.Cells(2), tbl.Range.Cells(4)
+    CopyCelToCel tbl.Range.Cells(6), tbl.Range.Cells(2)
+    CopyCelToCel tbl.Range.Cells(3), tbl.Range.Cells(6)
+    CopyCelToCel tbl.Range.Cells(5), tbl.Range.Cells(3)
+    CopyCelToCel tbl.Range.Cells(4), tbl.Range.Cells(5)
+  Case 20   'dcba
+    hoanvi2cel_khong_chua_bang tbl.Range.Cells(2), tbl.Range.Cells(6)
+    hoanvi2cel_khong_chua_bang tbl.Range.Cells(3), tbl.Range.Cells(5)
+  Case 21   'cabd
+    CopyCelToCel tbl.Range.Cells(2), tbl.Range.Cells(4)
+    CopyCelToCel tbl.Range.Cells(5), tbl.Range.Cells(2)
+    CopyCelToCel tbl.Range.Cells(3), tbl.Range.Cells(5)
+    CopyCelToCel tbl.Range.Cells(4), tbl.Range.Cells(3)
+  Case 22   'cbad
+    hoanvi2cel_khong_chua_bang tbl.Range.Cells(2), tbl.Range.Cells(5)
+  Case 23   'cadb
+    CopyCelToCel tbl.Range.Cells(2), tbl.Range.Cells(4)
+    CopyCelToCel tbl.Range.Cells(5), tbl.Range.Cells(2)
+    CopyCelToCel tbl.Range.Cells(6), tbl.Range.Cells(5)
+    CopyCelToCel tbl.Range.Cells(3), tbl.Range.Cells(6)
+    CopyCelToCel tbl.Range.Cells(4), tbl.Range.Cells(3)
+  End Select
+   txtof(tbl.Range.Cells(4).Range).text = ""   'Xoa' du~ liêu. trung gian
+  
+  End Select
+  'Stop
+       'Xoa' dong` dêm.
+'End Select
+End Sub
+
+
+
+'5
+'5.0
+Sub LuuTruCacMauHoanViPhuongAn()
+    'Dim xlApp As Object
+    Dim xlWb As Object, xlwb2 As Object
+    Dim xlSheet1 As Object, xlSheet2 As Object, xlSheet3 As Object, xlsheet4 As Object
+
+    Dim i As Integer, j As Integer
+    
+    ' T?o ?ng d?ng Excel
+    If xlApp Is Nothing Then Set xlApp = CreateObject("Excel.Application")
+    xlApp.Visible = False
+    ' M? file Excel
+    Set xlWb = xlApp.Workbooks.Open("D:\PMHoanViDeThi\matrics\type0.xlsx")
+    Set xlwb2 = xlApp.Workbooks.Open("D:\PMHoanViDeThi\matrics\type1.xlsx")
+    
+    ' Gán các sheet
+    Set xlSheet1 = xlWb.Sheets("Sheet1")
+    Set xlSheet2 = xlWb.Sheets("Sheet2")
+    Set xlSheet3 = xlWb.Sheets("Sheet3")
+    Set xlsheet4 = xlwb2.Sheets("Sheet1")
+    
+    ' Ð?c d? li?u t? c? ba sheet
+    For i = 1 To 24
+        For j = 1 To 4
+            idx01(i, j) = xlSheet1.Cells(i, j).value
+            idx02(i, j) = xlSheet2.Cells(i, j).value
+            idx03(i, j) = xlSheet3.Cells(i, j).value
+            idx12(i, j) = xlsheet4.Cells(i, j).value
+        Next j
+    Next i
+    
+    ' Ðóng file Excel
+    xlWb.Close False
+    xlwb2.Close False
+    
+    ' Gi?i phóng b? nh?
+    Set xlSheet1 = Nothing
+    Set xlSheet2 = Nothing
+    Set xlSheet3 = Nothing
+    Set xlWb = Nothing
+    Set xlwb2 = Nothing
+    'Set xlApp = Nothing
+    
+    ' Thông báo hoàn thành
+    ' MsgBox "Ðã hoàn thành vi?c d?c d? li?u và gán cho các m?ng."
+End Sub
+
+'6 Thuâ.t toan' hoan' vi. cac' cell trong bang?
+
+    '6.0    Khoi? tao. clipboard
 Sub openclb()
  Documents.Open ("D:\PMHoanViDeThi\clb.docx")
  Set clb = Documents("clb.docx")
 End Sub
-
+    
+    '6.1    Gia? lâp. copy vao` bô. nho' tam.
 Sub rng2clb(rng As Range)
  clb.Range.FormattedText = rng
 End Sub
-
-Sub clb2rng(rng As Range)
- rng.FormattedText = clb.Range(clb.Range.Start, clb.Range.End - 1)
-End Sub
-
-'Tao. môt. hoan' vi. cua? 4 gia' tri. sô (số thự tự các cell)
-Function hv(a As Long, b As Long, c As Long, d As Long) As Variant
- Dim x(1 To 4) As Long
- Dim i As Long, j As Long, tmp As Long
- x(1) = a
- x(2) = b
- x(3) = c
- x(4) = d
- Randomize
- For i = 1 To 4
-  j = Int(4 * Rnd) + 1
-  If j <> i Then
-   tmp = x(i)
-   x(i) = x(j)
-   x(j) = tmp
-  End If
- Next i
- hv = x
-End Function
-Function rngcell(cel As Cell) As Range
+    
+    '6.2    Lây' vung` du~ liêu. cua? cell
+Function rngcell(cel As cell) As Range
  Dim rng As Range
  Set rng = cel.Range
  rng.End = rng.End - 1
  Set rngcell = rng
 End Function
-Sub test()
- Set dehhoanvi = ActiveDocument
+    
+    '6.3    Hoan' vi. 4 cell trong bang?
+    Sub test_hoanvitbl()
+    LuuTruCacMauHoanViPhuongAn
+    Dim i As Long
+    Application.ScreenUpdating = False
+    Dim tbl As Table
+    For i = 1 To ActiveDocument.Tables.count
+     Set tbl = ActiveDocument.Tables(i)
+     hoanvitbl tbl
+'     Stop
+    Next i
+    End Sub
+    '  Hoan' vi. cac' cell trong bang?
+Sub hoanvitbl(tbl As Table)
+ 'Set dehhoanvi = ActiveDocument
  If clb Is Nothing Then openclb
  
- Dim tbl As Table
- Set tbl = Selection.Tables(1)
+ 'Dim tbl As Table
+ 'Set tbl = Selection.Tables(1)
  
  rng2clb tbl.Range
  'Stop
  
- Dim idx As Variant
- idx = hv(1, 2, 3, 4)
- 'Stop
- 
  Dim i As Long
- Dim cel As Cell
+ Dim roulet As Long
+ Randomize
+ roulet = Int(Rnd * 24) + 1      'Chon. 1 trong 24 kiêu? hoan' vi.
+ 
+ Dim cel As cell
  Dim rng As Range
  For i = 1 To 4
   'Stop
@@ -63,6 +730,6 @@ Sub test()
   'Stop
   rng.Select
   'Stop
-  rng.FormattedText = rngcell(clb.Tables(1).Range.Cells(idx(i)))
+  rng.FormattedText = rngcell(clb.Tables(1).Range.Cells(idx12(roulet, i)))
  Next i
 End Sub
